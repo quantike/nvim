@@ -7,3 +7,5 @@ session.vim
 # Ignore plugin specific files
 plugged/
 
+# Ignore compiled config files
+plugin/
