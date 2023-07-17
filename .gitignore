@@ -1,0 +1,9 @@
+# Ignore swap files
+*.swp
+
+# Ignore session files
+session.vim
+
+# Ignore plugin specific files
+plugged/
+
