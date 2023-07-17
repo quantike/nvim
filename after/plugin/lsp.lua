@@ -3,14 +3,14 @@ local lsp = require("lsp-zero")
 lsp.preset("recommended")
 
 lsp.ensure_installed({
-  'vimdoc',
-  'gopls',
-  'rust_analyzer',
+  'lua_ls',         -- lua 
+  'ruff_lsp',       -- python
+  'gopls',          -- go-lang
+  'rust_analyzer',  -- rust!
 })
 
 -- Fix Undefined global 'vim'
 lsp.nvim_workspace()
-
 
 local cmp = require('cmp')
 local cmp_select = {behavior = cmp.SelectBehavior.Select}

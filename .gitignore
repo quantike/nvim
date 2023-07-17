@@ -8,4 +8,4 @@ session.vim
 plugged/
 
 # Ignore compiled config files
-plugin/
+plugin/packer_compiled.lua 
