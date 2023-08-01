@@ -1,10 +1,9 @@
 local lsp = require("lsp-zero")
-
 lsp.preset("recommended")
 
 lsp.ensure_installed({
   'lua_ls',         -- lua 
-  'ruff_lsp',       -- python
+  'pyright',        -- python
   'gopls',          -- go-lang
   'rust_analyzer',  -- rust!
 })
@@ -52,6 +51,8 @@ lsp.on_attach(function(client, bufnr)
   vim.keymap.set("n", "<leader>vrn", function() vim.lsp.buf.rename() end, opts)
   vim.keymap.set("i", "<C-h>", function() vim.lsp.buf.signature_help() end, opts)
 end)
+
+vim.g.python3_host_prog = "/usr/local/opt/python@3.11/bin/python3.11"
 
 lsp.setup()
 
