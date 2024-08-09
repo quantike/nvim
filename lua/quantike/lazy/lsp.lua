@@ -14,80 +14,119 @@ return {
     },
 
     config = function()
-        local cmp = require('cmp')
-        local cmp_lsp = require("cmp_nvim_lsp")
-        local capabilities = vim.tbl_deep_extend(
-            "force",
-            {},
-            vim.lsp.protocol.make_client_capabilities(),
-            cmp_lsp.default_capabilities())
+        -- Helper function to setup keybindings when an LSP server attaches to a buffer
+        local function on_attach(client, bufnr)
+            local opts = { noremap = true, silent = true, buffer = bufnr }
 
-        require("fidget").setup({})
-        require("mason").setup()
-        require("mason-lspconfig").setup({
-            ensure_installed = {
-                "lua_ls", 
-                "ruff",
-                "rust_analyzer",
-                "gopls",
-            },
-            handlers = {
-                function(server_name) -- default handler (optional)
+            -- Keymaps for LSP actions
+            vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+            vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
+            vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
+            vim.keymap.set("n", "gT", vim.lsp.buf.type_definition, opts)
+            vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
 
-                    require("lspconfig")[server_name].setup {
-                        capabilities = capabilities
-                    }
-                end,
+            vim.keymap.set("n", "<space>cr", vim.lsp.buf.rename, opts)
+            vim.keymap.set("n", "<space>ca", vim.lsp.buf.code_action, opts)
+        end
 
-                ["lua_ls"] = function()
-                    local lspconfig = require("lspconfig")
-                    lspconfig.lua_ls.setup {
-                        capabilities = capabilities,
-                        settings = {
-                            Lua = {
-				    runtime = { version = "Lua 5.1" },
-                                diagnostics = {
-                                    globals = { "vim", "it", "describe", "before_each", "after_each" },
+        -- Capabilities configuration for completion
+        local function setup_capabilities()
+            local cmp_lsp = require("cmp_nvim_lsp")
+            return vim.tbl_deep_extend(
+                "force",
+                {},
+                vim.lsp.protocol.make_client_capabilities(),
+                cmp_lsp.default_capabilities()
+            )
+        end
+
+        -- Setup each LSP server
+        local function setup_lsp_servers()
+            local lspconfig = require("lspconfig")
+            local capabilities = setup_capabilities()
+
+            require("mason-lspconfig").setup({
+                ensure_installed = {
+                    "lua_ls",
+                    "ruff",
+                    "rust_analyzer",
+                },
+                handlers = {
+                    function(server_name)
+                        lspconfig[server_name].setup {
+                            capabilities = capabilities,
+                            on_attach = on_attach,
+                        }
+                    end,
+
+                    ["lua_ls"] = function()
+                        lspconfig.lua_ls.setup {
+                            capabilities = capabilities,
+                            on_attach = on_attach,
+                            settings = {
+                                Lua = {
+                                    runtime = { version = "Lua 5.1" },
+                                    diagnostics = {
+                                        globals = { "vim", "it", "describe", "before_each", "after_each" },
+                                    }
                                 }
                             }
                         }
-                    }
-                end,
-            }
-        })
-
-        local cmp_select = { behavior = cmp.SelectBehavior.Select }
-
-        cmp.setup({
-            snippet = {
-                expand = function(args)
-                    require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
-                end,
-            },
-            mapping = cmp.mapping.preset.insert({
-                ['<C-p>'] = cmp.mapping.select_prev_item(cmp_select),
-                ['<C-n>'] = cmp.mapping.select_next_item(cmp_select),
-                ['<Tab>'] = cmp.mapping.confirm({ select = true }),
-                ["<C-Space>"] = cmp.mapping.complete(),
-            }),
-            sources = cmp.config.sources({
-                { name = 'nvim_lsp' },
-                { name = 'luasnip' }, -- For luasnip users.
-            }, {
-                { name = 'buffer' },
+                    end,
+                }
             })
-        })
+        end
 
-        vim.diagnostic.config({
-            -- update_in_insert = true,
-            float = {
-                focusable = false,
-                style = "minimal",
-                border = "rounded",
-                source = "always",
-                header = "",
-                prefix = "",
-            },
-        })
+        -- Setup completion with nvim-cmp
+        local function setup_cmp()
+            local cmp = require('cmp')
+            local cmp_select = { behavior = cmp.SelectBehavior.Select }
+
+            cmp.setup({
+                snippet = {
+                    expand = function(args)
+                        require('luasnip').lsp_expand(args.body)
+                    end,
+                },
+                mapping = cmp.mapping.preset.insert({
+                    ['<C-p>'] = cmp.mapping.select_prev_item(cmp_select),
+                    ['<C-n>'] = cmp.mapping.select_next_item(cmp_select),
+                    ['<Tab>'] = cmp.mapping.confirm({ select = true }),
+                    ["<C-Space>"] = cmp.mapping.complete(),
+                }),
+                sources = cmp.config.sources({
+                    { name = 'nvim_lsp' },
+                    { name = 'luasnip' },
+                }, {
+                    { name = 'buffer' },
+                })
+            })
+        end
+
+        -- Setup diagnostic display options
+        local function setup_diagnostics()
+            vim.diagnostic.config({
+                float = {
+                    focusable = false,
+                    style = "minimal",
+                    border = "rounded",
+                    source = "always",
+                    header = "",
+                    prefix = "",
+                },
+            })
+        end
+
+        -- Initialize all setups
+        local function setup()
+            require("fidget").setup({})
+            require("mason").setup()
+            setup_lsp_servers()
+            setup_cmp()
+            setup_diagnostics()
+        end
+
+        setup()
     end
 }
+

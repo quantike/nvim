@@ -1,5 +1,5 @@
 function ColorMyPencils(color)
-	color = color or "gruvbox"
+	color = color or "nordic"
 	vim.cmd.colorscheme(color)
 
 	vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
@@ -9,11 +9,10 @@ end
 
 
 return {
-    "ellisonleao/gruvbox.nvim",
-    name = "gruvbox",
+    'AlexvZyl/nordic.nvim',
+    lazy = false,
+    priority = 1000,
     config = function()
-        require('gruvbox').setup({
-            transparent_mode = true
-        })
+        require 'nordic' .load()
     end
 }
