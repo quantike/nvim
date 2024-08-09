@@ -4,7 +4,6 @@ function ColorMyPencils(color)
 
 	vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
 	vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
-
 end
 
 
@@ -13,6 +12,10 @@ return {
     lazy = false,
     priority = 1000,
     config = function()
-        require 'nordic' .load()
+        require 'nordic'.setup {
+            transparent_bg = true,
+        }
+        require 'nordic'.load()
+        ColorMyPencils()  -- Apply the transparency settings
     end
 }

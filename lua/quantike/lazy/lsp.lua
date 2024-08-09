@@ -19,11 +19,11 @@ return {
             local opts = { noremap = true, silent = true, buffer = bufnr }
 
             -- Keymaps for LSP actions
-            vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
-            vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
-            vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
-            vim.keymap.set("n", "gT", vim.lsp.buf.type_definition, opts)
-            vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+            vim.keymap.set("n", "<leader>gd", vim.lsp.buf.definition, opts)
+            vim.keymap.set("n", "<leader>gr", vim.lsp.buf.references, opts)
+            vim.keymap.set("n", "<leader>gD", vim.lsp.buf.declaration, opts)
+            vim.keymap.set("n", "<leader>gT", vim.lsp.buf.type_definition, opts)
+            vim.keymap.set("n", "<leader>K", vim.lsp.buf.hover, opts)
 
             vim.keymap.set("n", "<space>cr", vim.lsp.buf.rename, opts)
             vim.keymap.set("n", "<space>ca", vim.lsp.buf.code_action, opts)
