@@ -14,6 +14,16 @@ return {
     },
 
     config = function()
+        -- Variable to store current Rust Analyzer settings
+        local rust_analyzer_features = {
+            cargo = {
+                loadOutDirsFromCheck = true,
+            },
+            procMacro = {
+                enable = true,
+            },
+        }
+
         -- Helper function to setup keybindings when an LSP server attaches to a buffer
         local function on_attach(client, bufnr)
             local opts = { noremap = true, silent = true, buffer = bufnr }
@@ -40,6 +50,22 @@ return {
             )
         end
 
+        -- Function to reload Rust Analyzer with updated settings
+        local function reload_rust_analyzer()
+            local lspconfig = require("lspconfig")
+            local capabilities = setup_capabilities()
+
+            lspconfig.rust_analyzer.setup {
+                capabilities = capabilities,
+                on_attach = on_attach,
+                settings = {
+                    rust_analyzer = rust_analyzer_features,
+                },
+            }
+
+            vim.cmd([[LspRestart]]) -- Restarts the language server to apply new settings
+        end
+
         -- Setup each LSP server
         local function setup_lsp_servers()
             local lspconfig = require("lspconfig")
@@ -53,10 +79,14 @@ return {
                 },
                 handlers = {
                     function(server_name)
-                        lspconfig[server_name].setup {
-                            capabilities = capabilities,
-                            on_attach = on_attach,
-                        }
+                        if server_name == "rust_analyzer" then
+                            reload_rust_analyzer()
+                        else
+                            lspconfig[server_name].setup {
+                                capabilities = capabilities,
+                                on_attach = on_attach,
+                            }
+                        end
                     end,
 
                     ["lua_ls"] = function()
@@ -116,6 +146,17 @@ return {
                 },
             })
         end
+
+        -- Create a command to modify and reload Rust Analyzer settings
+        vim.api.nvim_create_user_command("RustAnalyzerToggleFeature", function(opts)
+            local feature = opts.args
+            if rust_analyzer_features[feature] ~= nil then
+                rust_analyzer_features[feature] = not rust_analyzer_features[feature]
+            else
+                vim.notify("Invalid feature: " .. feature)
+            end
+            reload_rust_analyzer()
+        end, { nargs = 1 })
 
         -- Initialize all setups
         local function setup()
